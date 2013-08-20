@@ -68,8 +68,7 @@ public class Expand
                 {
                     if (property.Name == columns[colIndex])
                     {
-                        Object val = rowColumns[colIndex];
-                        val = TypeConversion(property, val);
+                        var val = TypeConversion(property, rowColumns[colIndex]);
                         property.SetValue(obj, val, new object[0]);
                         break;
                     }
@@ -81,16 +80,30 @@ public class Expand
         return result;
     }
 
-    private static object TypeConversion(PropertyInfo property, object val)
+    private static object TypeConversion(PropertyInfo property, string val)
     {
         if (property.PropertyType == typeof (String))
-            return Convert.ToString(val).Trim();
+            return val.Trim();
         if (property.PropertyType == typeof (Int32))
-            return Convert.ToInt32(val);
+            return int.Parse(val);
+        if (property.PropertyType == typeof (uint))
+            return uint.Parse(val);
         if (property.PropertyType == typeof (Double))
-            return Convert.ToDouble(val, americanNumberFormat);
+            return double.Parse(val, americanNumberFormat);
+        if (property.PropertyType == typeof (float))
+            return float.Parse(val, americanNumberFormat);
         if (property.PropertyType == typeof (Boolean))
-            return Convert.ToBoolean(val);
+            return bool.Parse(val);
+        if (property.PropertyType.IsEnum)
+            return Enum.Parse(property.PropertyType, val);
+        if (property.PropertyType == typeof (DateTime))
+            return Convert.ToDateTime(val);
+        if (property.PropertyType == typeof (Byte))
+            return Byte.Parse(val);
+        if (property.PropertyType == typeof (long))
+            return long.Parse(val);
+        if (property.PropertyType == typeof (decimal))
+            return decimal.Parse(val, americanNumberFormat);
         return null;
     }
 }
