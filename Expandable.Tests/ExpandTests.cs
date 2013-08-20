@@ -147,7 +147,35 @@ namespace Expandable.Tests
             }
 
             //TODO: test SByte, Int16, UInt16, Int64, UInt64, Single, Char
+            //TODO: test for ignore casing on properties
         }
+
+        [TestFixture]
+        public class When_expanding_table_to_list_of_objects_that_use_constructor_to_set_values_on_properties
+        {
+            [Test]
+            public void It_will_be_able_to_set_arguments_of_string()
+            {
+                var programmingLanguages = Expand.Table(@"
+                Name    | YearInvented
+                C#      | 2001 
+                ").ToListOf<ProgrammingLanguage>();
+                Assert.IsNotNull(programmingLanguages);
+                Assert.AreEqual("C#", programmingLanguages.First().Name);
+            }
+        }
+    }
+
+    internal class ProgrammingLanguage
+    {
+        public ProgrammingLanguage(string name, int yearInvented)
+        {
+            Name = name;
+            YearInvented = yearInvented;
+        }
+
+        public String Name { get; private set; }
+        public int YearInvented { get; set; }
     }
 
     internal class Person

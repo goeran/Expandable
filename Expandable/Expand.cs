@@ -60,21 +60,35 @@ public class Expand
         foreach (var row in rows)
         {
             var rowColumns = row.Split('|');
-            var obj = Activator.CreateInstance<T>();
-            var properties = obj.GetType().GetProperties(BindingFlags.Instance | BindingFlags.SetProperty | BindingFlags.Public);
-            foreach (var property in properties)
+            var objectType = typeof (T);
+            var constructors = objectType.GetConstructors(BindingFlags.Instance | BindingFlags.Public);
+            T obj = default(T);
+            if (constructors.Any(c => c.GetParameters().Count() == 0))
             {
-                for (int colIndex = 0; colIndex < columns.Count; colIndex++)
+                obj = Activator.CreateInstance<T>();
+            } 
+            else if (constructors.Any(c => c.GetParameters().Count() > 0))
+            {
+                var constructorParams = constructors.Where(c => c.GetParameters().Any()).First().GetParameters();
+            }
+
+            if (obj != null)
+            {
+                var properties = obj.GetType().GetProperties(BindingFlags.Instance | BindingFlags.SetProperty | BindingFlags.Public);
+                foreach (var property in properties)
                 {
-                    if (property.Name == columns[colIndex])
+                    for (int colIndex = 0; colIndex < columns.Count; colIndex++)
                     {
-                        var val = TypeConversion(property, rowColumns[colIndex]);
-                        property.SetValue(obj, val, new object[0]);
-                        break;
+                        if (property.Name == columns[colIndex])
+                        {
+                            var val = TypeConversion(property, rowColumns[colIndex]);
+                            property.SetValue(obj, val, new object[0]);
+                            break;
+                        }
                     }
                 }
+                result.Add(obj);
             }
-            result.Add(obj);
         }
 
         return result;
