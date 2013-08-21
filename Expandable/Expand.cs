@@ -10,7 +10,6 @@ public class Expand
     private string table;
     private static readonly NumberFormatInfo americanNumberFormat = new CultureInfo("en-US").NumberFormat;
 
-
     private Expand()
     {
     }
@@ -29,21 +28,33 @@ public class Expand
     public IEnumerable<T> ToListOf<T>()
     {
         var result = new List<T>();
+        var objectType = typeof(T);
         var tableParser = new TableParser(table);
         
         tableParser.Parse();
 
         foreach (var row in tableParser.Rows)
         {
-            var rowColumns = row.Split('|');
-            var objectType = typeof (T);
             var constructors = objectType.GetConstructors(BindingFlags.Instance | BindingFlags.Public);
-            T obj = default(T);
-            if (constructors.Any(c => c.GetParameters().Count() == 0))
+            if (constructors.Any(c => !c.GetParameters().Any()))
             {
-                obj = Activator.CreateInstance<T>();
+                var obj = Activator.CreateInstance<T>();
+                var properties = obj.GetType().GetProperties(BindingFlags.Instance | BindingFlags.SetProperty | BindingFlags.Public);
+                foreach (var property in properties)
+                {
+                    for (int colIndex = 0; colIndex < tableParser.Columns.Count(); colIndex++)
+                    {
+                        if (property.Name == tableParser.Columns.ElementAt(colIndex))
+                        {
+                            var val = TypeConversion(property.PropertyType, row.ElementAt(colIndex));
+                            property.SetValue(obj, val, new object[0]);
+                            break;
+                        }
+                    }
+                }
+                result.Add(obj);
             } 
-            else if (constructors.Any(c => c.GetParameters().Count() > 0))
+            else if (constructors.Any(c => c.GetParameters().Any()))
             {
                 ConstructorInfo ctor = null;
                 var ctorMatchesAgainstColumns = new Dictionary<ConstructorInfo, int>();
@@ -68,38 +79,24 @@ public class Expand
                     ctor = ctorMatchesAgainstColumns.OrderByDescending(kv => kv.Value).First().Key;
                 }
 
-                var ctorParams = new List<Object>();
-                foreach (var param in ctor.GetParameters())
+                if (ctor != null)
                 {
-                    for (var colIndex = 0; colIndex < tableParser.Columns.Count(); colIndex++)
+                    var ctorParams = new List<Object>();
+                    foreach (var param in ctor.GetParameters())
                     {
-                        if (param.Name.ToLower() == tableParser.Columns.ElementAt(colIndex).ToLower())
+                        for (var colIndex = 0; colIndex < tableParser.Columns.Count(); colIndex++)
                         {
-                            var val = TypeConversion(param.ParameterType, rowColumns[colIndex]);
-                            ctorParams.Add(val);
-                            break;
+                            if (param.Name.ToLower() == tableParser.Columns.ElementAt(colIndex).ToLower())
+                            {
+                                var val = TypeConversion(param.ParameterType, row.ElementAt(colIndex));
+                                ctorParams.Add(val);
+                                break;
+                            }
                         }
                     }
+                    var obj = (T)Activator.CreateInstance(typeof(T), ctorParams.ToArray());
+                    result.Add(obj);
                 }
-                obj = (T)Activator.CreateInstance(typeof (T), ctorParams.ToArray());
-            }
-
-            if (obj != null)
-            {
-                var properties = obj.GetType().GetProperties(BindingFlags.Instance | BindingFlags.SetProperty | BindingFlags.Public);
-                foreach (var property in properties)
-                {
-                    for (int colIndex = 0; colIndex < tableParser.Columns.Count(); colIndex++)
-                    {
-                        if (property.Name == tableParser.Columns.ElementAt(colIndex))
-                        {
-                            var val = TypeConversion(property.PropertyType, rowColumns[colIndex]);
-                            property.SetValue(obj, val, new object[0]);
-                            break;
-                        }
-                    }
-                }
-                result.Add(obj);
             }
         }
 

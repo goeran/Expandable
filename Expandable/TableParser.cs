@@ -9,7 +9,7 @@ namespace Expandable
     {
         private string data;
         private readonly List<string> columns = new List<string>();
-        private readonly List<string> rows = new List<string>();
+        private readonly List<List<string>> rows = new List<List<string>>();
 
         public TableParser(string data)
         {
@@ -21,7 +21,7 @@ namespace Expandable
             get { return columns; }
         }
 
-        public IEnumerable<string> Rows
+        public IEnumerable<IEnumerable<string>> Rows
         {
             get { return rows; }
         }
@@ -43,7 +43,8 @@ namespace Expandable
                         }
                         else
                         {
-                            rows.Add(line);
+                            var rowColumns = line.Split('|');
+                            rows.Add(new List<string>(rowColumns));
                         }
                     }
                 }
