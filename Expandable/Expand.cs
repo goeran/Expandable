@@ -25,7 +25,7 @@ public class Expand
         return expand;
     }
 
-    public IEnumerable<T> ToListOf<T>()
+    public IList<T> ToListOf<T>()
     {
         var result = new List<T>();
         var theClass = typeof(T);
