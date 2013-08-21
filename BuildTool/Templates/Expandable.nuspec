@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Expandable.dll</id>
+    <version>$(version)</version>
+    <title>Expandable</title>
+    <authors>Gøran Hansen</authors>
+    <owners>Gøran Hansen</owners>
+    <licenseUrl>http://github.com/goeran/Expandable</licenseUrl>
+    <projectUrl>http://github.com/goeran/Expandable</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Simple tool for expanding data (strings) to lists of objects.</description>
+    <releaseNotes>
+    </releaseNotes>
+    <copyright>Copyright 2013</copyright>
+    <tags>expandable expand</tags>
+  </metadata>
+</package>
