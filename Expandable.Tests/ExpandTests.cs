@@ -175,19 +175,39 @@ namespace Expandable.Tests
                 Assert.AreEqual(1, programmingLanguages.Count());
                 Assert.AreEqual("C#", programmingLanguages.First().Name);
             }
+
+            [Test]
+            public void It_will_handle_overloaded_ctors()
+            {
+                var programmingLanguages = Expand.Table(@"  
+                    Name    | YearInvented  | IsOpenSource  | Comment
+                    C#      | 2001          | false         |
+                    foobar  | 1996          | true          | Something I just invented for the sake of the test
+                ").ToListOf<ProgrammingLanguage>();
+                Assert.AreEqual(2, programmingLanguages.Count());
+                var foobar = programmingLanguages.ElementAt(1);
+                Assert.IsTrue(foobar.IsOpoenSource);
+            }
         }
     }
 
     internal class ProgrammingLanguage
     {
-        public ProgrammingLanguage(string name, int yearInvented)
+        public ProgrammingLanguage(string name, int yearInvented) :
+            this(name, yearInvented, false)
+        {
+        }
+
+        public ProgrammingLanguage(string name, int yearInvented, bool isOpenSource)
         {
             Name = name;
             YearInvented = yearInvented;
+            IsOpoenSource = isOpenSource;
         }
 
         public String Name { get; private set; }
-        public int YearInvented { get; set; }
+        public int YearInvented { get; private set; }
+        public bool IsOpoenSource { get; private set; }
     }
 
     internal class Person

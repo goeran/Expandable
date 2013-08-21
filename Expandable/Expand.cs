@@ -4,11 +4,13 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Expandable;
 
 public class Expand
 {
     private string table;
     private static readonly NumberFormatInfo americanNumberFormat = new CultureInfo("en-US").NumberFormat;
+
 
     private Expand()
     {
@@ -28,31 +30,11 @@ public class Expand
     public IEnumerable<T> ToListOf<T>()
     {
         var result = new List<T>();
-        String header = null;
-        var columns = new List<String>();
-        var rows = new List<String>();
+        var tableParser = new TableParser(table);
+        
+        tableParser.Parse();
 
-        using (var reader = new StringReader(table))
-        {
-            while (reader.Peek() != -1)
-            {
-                var line = reader.ReadLine();
-                if (!String.IsNullOrWhiteSpace(line))
-                {
-                    if (header == null)
-                    {
-                        header = line;
-                        columns.AddRange(header.Split('|').Select(c => c.Trim()));
-                    }
-                    else
-                    {
-                        rows.Add(line);
-                    }
-                }
-            }
-        }
-
-        foreach (var row in rows)
+        foreach (var row in tableParser.Rows)
         {
             var rowColumns = row.Split('|');
             var objectType = typeof (T);
@@ -64,31 +46,38 @@ public class Expand
             } 
             else if (constructors.Any(c => c.GetParameters().Count() > 0))
             {
-                var ctor = constructors.Where(c => c.GetParameters().Any()).First();
-                var constructorParams = ctor.GetParameters();
-
+                ConstructorInfo ctor = null;
                 var ctorMatchesAgainstColumns = new Dictionary<ConstructorInfo, int>();
-                /*foreach (var ctorParam in constructorParams)
+                //1. iterere over alle constructorene
+                foreach (var ctorCandidate in constructors)
                 {
-                    for (var colIndex = 0; colIndex < columns.Count; colIndex++)
-                    {
-                        if (!ctorMatchesAgainstColumns.ContainsKey(ctor))
-                            ctorMatchesAgainstColumns[ctor] = 0;
+                    if (!ctorMatchesAgainstColumns.ContainsKey(ctorCandidate))
+                        ctorMatchesAgainstColumns[ctorCandidate] = 0;
 
-                        if (ctorParam.Name == columns[colIndex])
+                    //2. iterere over alle params til ctor, og telle hvor mange match man får mot navn i tabellkolonne
+                    var ctorCandidateParams = ctorCandidate.GetParameters();
+                    foreach (var param in ctorCandidateParams)
+                    {
+                        foreach (var col in tableParser.Columns)
                         {
-                            ctorMatchesAgainstColumns[ctorParam]++;
-                            break;
+                            if (param.Name.ToLower() == col.ToLower())
+                            {
+                                ctorMatchesAgainstColumns[ctorCandidate]++;
+                                break;
+                            }
                         }
                     }
-                }*/
+                    
+                    //3. finne den best egnende ctoren, og deretter skape objektet basert på det
+                    ctor = ctorMatchesAgainstColumns.OrderByDescending(kv => kv.Value).First().Key;
+                }
 
                 var ctorParams = new List<Object>();
                 foreach (var param in ctor.GetParameters())
                 {
-                    for (var colIndex = 0; colIndex < columns.Count; colIndex++)
+                    for (var colIndex = 0; colIndex < tableParser.Columns.Count(); colIndex++)
                     {
-                        if (param.Name.ToLower() == columns[colIndex].ToLower())
+                        if (param.Name.ToLower() == tableParser.Columns.ElementAt(colIndex).ToLower())
                         {
                             var val = TypeConversion(param.ParameterType, rowColumns[colIndex]);
                             ctorParams.Add(val);
@@ -104,9 +93,9 @@ public class Expand
                 var properties = obj.GetType().GetProperties(BindingFlags.Instance | BindingFlags.SetProperty | BindingFlags.Public);
                 foreach (var property in properties)
                 {
-                    for (int colIndex = 0; colIndex < columns.Count; colIndex++)
+                    for (int colIndex = 0; colIndex < tableParser.Columns.Count(); colIndex++)
                     {
-                        if (property.Name == columns[colIndex])
+                        if (property.Name == tableParser.Columns.ElementAt(colIndex))
                         {
                             var val = TypeConversion(property.PropertyType, rowColumns[colIndex]);
                             property.SetValue(obj, val, new object[0]);
