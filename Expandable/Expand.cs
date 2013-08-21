@@ -48,13 +48,11 @@ public class Expand
             {
                 ConstructorInfo ctor = null;
                 var ctorMatchesAgainstColumns = new Dictionary<ConstructorInfo, int>();
-                //1. iterere over alle constructorene
                 foreach (var ctorCandidate in constructors)
                 {
                     if (!ctorMatchesAgainstColumns.ContainsKey(ctorCandidate))
                         ctorMatchesAgainstColumns[ctorCandidate] = 0;
 
-                    //2. iterere over alle params til ctor, og telle hvor mange match man får mot navn i tabellkolonne
                     var ctorCandidateParams = ctorCandidate.GetParameters();
                     foreach (var param in ctorCandidateParams)
                     {
@@ -68,7 +66,6 @@ public class Expand
                         }
                     }
                     
-                    //3. finne den best egnende ctoren, og deretter skape objektet basert på det
                     ctor = ctorMatchesAgainstColumns.OrderByDescending(kv => kv.Value).First().Key;
                 }
 
