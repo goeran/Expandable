@@ -157,10 +157,22 @@ namespace Expandable.Tests
             public void It_will_be_able_to_set_arguments_of_string()
             {
                 var programmingLanguages = Expand.Table(@"
-                Name    | YearInvented
-                C#      | 2001 
+                    Name    | YearInvented
+                    C#      | 2001 
                 ").ToListOf<ProgrammingLanguage>();
                 Assert.IsNotNull(programmingLanguages);
+                Assert.AreEqual("C#", programmingLanguages.First().Name);
+                Assert.AreEqual(2001, programmingLanguages.First().YearInvented);
+            }
+
+            [Test]
+            public void It_will_ignore_columns_that_does_not_match_ctor()
+            {
+                var programmingLanguages = Expand.Table(@"
+                    Comment                       | Name    | YearInvented  | Comment
+                    Great strongly typed language |C#       | 2001          | 
+                ").ToListOf<ProgrammingLanguage>();
+                Assert.AreEqual(1, programmingLanguages.Count());
                 Assert.AreEqual("C#", programmingLanguages.First().Name);
             }
         }
