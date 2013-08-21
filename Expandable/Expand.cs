@@ -4,11 +4,12 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using Expandable;
+using Expandable.Extensions;
 
 public class Expand
 {
     private string table;
-    private static readonly NumberFormatInfo americanNumberFormat = new CultureInfo("en-US").NumberFormat;
+    private BindingFlags instanceMemebersAndPublic = BindingFlags.Instance | BindingFlags.Public;
 
     private Expand()
     {
@@ -28,25 +29,24 @@ public class Expand
     public IEnumerable<T> ToListOf<T>()
     {
         var result = new List<T>();
-        var objectType = typeof(T);
+        var theClass = typeof(T);
         var tableParser = new TableParser(table);
         
         tableParser.Parse();
 
         foreach (var row in tableParser.Rows)
         {
-            var constructors = objectType.GetConstructors(BindingFlags.Instance | BindingFlags.Public);
-            if (constructors.Any(c => !c.GetParameters().Any()))
+            if (theClass.HasAParameterlessPublicCtor())
             {
                 var obj = Activator.CreateInstance<T>();
-                var properties = obj.GetType().GetProperties(BindingFlags.Instance | BindingFlags.SetProperty | BindingFlags.Public);
+                var properties = obj.GetType().GetProperties(instanceMemebersAndPublic | BindingFlags.SetProperty);
                 foreach (var property in properties)
                 {
                     for (int colIndex = 0; colIndex < tableParser.Columns.Count(); colIndex++)
                     {
                         if (property.Name == tableParser.Columns.ElementAt(colIndex))
                         {
-                            var val = TypeConversion(property.PropertyType, row.ElementAt(colIndex));
+                            var val = row.ElementAt(colIndex).ConvertUsingType(property.PropertyType);
                             property.SetValue(obj, val, new object[0]);
                             break;
                         }
@@ -54,11 +54,10 @@ public class Expand
                 }
                 result.Add(obj);
             } 
-            else if (constructors.Any(c => c.GetParameters().Any()))
+            else
             {
-                ConstructorInfo ctor = null;
                 var ctorMatchesAgainstColumns = new Dictionary<ConstructorInfo, int>();
-                foreach (var ctorCandidate in constructors)
+                foreach (var ctorCandidate in theClass.PublicConstructors())
                 {
                     if (!ctorMatchesAgainstColumns.ContainsKey(ctorCandidate))
                         ctorMatchesAgainstColumns[ctorCandidate] = 0;
@@ -66,19 +65,14 @@ public class Expand
                     var ctorCandidateParams = ctorCandidate.GetParameters();
                     foreach (var param in ctorCandidateParams)
                     {
-                        foreach (var col in tableParser.Columns)
+                        if (tableParser.Columns.Any(col => param.Name.ToLower() == col.ToLower()))
                         {
-                            if (param.Name.ToLower() == col.ToLower())
-                            {
-                                ctorMatchesAgainstColumns[ctorCandidate]++;
-                                break;
-                            }
+                            ctorMatchesAgainstColumns[ctorCandidate]++;
                         }
                     }
-                    
-                    ctor = ctorMatchesAgainstColumns.OrderByDescending(kv => kv.Value).First().Key;
                 }
 
+                var ctor = ctorMatchesAgainstColumns.OrderByDescending(kv => kv.Value).First().Key;
                 if (ctor != null)
                 {
                     var ctorParams = new List<Object>();
@@ -88,7 +82,7 @@ public class Expand
                         {
                             if (param.Name.ToLower() == tableParser.Columns.ElementAt(colIndex).ToLower())
                             {
-                                var val = TypeConversion(param.ParameterType, row.ElementAt(colIndex));
+                                var val = row.ElementAt(colIndex).ConvertUsingType(param.ParameterType);
                                 ctorParams.Add(val);
                                 break;
                             }
@@ -101,34 +95,5 @@ public class Expand
         }
 
         return result;
-    }
-
-    private static object TypeConversion(Type memberInfo, string val)
-    {
-        var memberType = memberInfo;
-
-        if (memberType == typeof (String))
-            return val.Trim();
-        if (memberType == typeof(Int32))
-            return int.Parse(val);
-        if (memberType == typeof(uint))
-            return uint.Parse(val);
-        if (memberType == typeof(Double))
-            return double.Parse(val, americanNumberFormat);
-        if (memberType == typeof(float))
-            return float.Parse(val, americanNumberFormat);
-        if (memberType == typeof(Boolean))
-            return bool.Parse(val);
-        if (memberType.IsEnum)
-            return Enum.Parse(memberType, val);
-        if (memberType == typeof(DateTime))
-            return Convert.ToDateTime(val);
-        if (memberType == typeof(Byte))
-            return Byte.Parse(val);
-        if (memberType == typeof(long))
-            return long.Parse(val);
-        if (memberType == typeof(decimal))
-            return decimal.Parse(val, americanNumberFormat);
-        return null;
     }
 }
