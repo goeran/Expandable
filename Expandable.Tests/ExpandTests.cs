@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Expandable.Tests.ClassesUsedForTesting;
 using NUnit.Framework;
 
 namespace Expandable.Tests
@@ -189,53 +190,5 @@ namespace Expandable.Tests
                 Assert.IsTrue(foobar.IsOpoenSource);
             }
         }
-    }
-
-    internal class ProgrammingLanguage
-    {
-        public ProgrammingLanguage(string name, int yearInvented) :
-            this(name, yearInvented, false)
-        {
-        }
-
-        public ProgrammingLanguage(string name, int yearInvented, bool isOpenSource)
-        {
-            Name = name;
-            YearInvented = yearInvented;
-            IsOpoenSource = isOpenSource;
-        }
-
-        public String Name { get; private set; }
-        public int YearInvented { get; private set; }
-        public bool IsOpoenSource { get; private set; }
-    }
-
-    internal class Person
-    {
-        public byte Department { get; set; }
-        public string Name { get; set; }
-        public int Age { get; set; }
-        public double Salary { get; set; }
-        public bool HasPhone { get; set; }
-        public float Height { get; set; }
-        public Address Address { get; set; }
-        public DateTime DateOfBirth { get; set; }
-        public EmployeeStatus EmployeeStatus { get; set; }
-        public uint Performance { get; set; }
-        public long NetWorth { get; set; }
-        public decimal Weight { get; set; }
-    }
-
-    internal enum EmployeeStatus
-    {
-        Unknown,
-        Employed,
-        Retired
-    }
-
-    internal class Address
-    {
-        public String StreetName { get; set; }
-        public int StreetNumber { get; set; }
     }
 }
