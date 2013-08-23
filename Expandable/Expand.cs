@@ -8,7 +8,7 @@ using Expandable.Extensions;
 public class Expand
 {
     private string table;
-    private BindingFlags instanceMemebersAndPublic = BindingFlags.Instance | BindingFlags.Public;
+    private const BindingFlags instanceMemebersAndPublic = BindingFlags.Instance | BindingFlags.Public;
 
     private Expand()
     {
