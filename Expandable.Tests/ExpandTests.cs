@@ -190,5 +190,88 @@ namespace Expandable.Tests
                 Assert.IsTrue(foobar.IsOpoenSource);
             }
         }
+
+        [TestFixture]
+        public class When_expanding_groups_of_tables_to_list_of_objects
+        {
+            private Expand.ExpandGroup groupsOfProgrammingLanguages;
+
+            //TODO: Test input, test that groups data is parsed
+
+            [SetUp]
+            public void Setup()
+            {
+                groupsOfProgrammingLanguages = Expand.GroupOfTables(@"
+                    Static:
+                    Name    | YearInvented  | IsOpenSource
+                    C#      | 2001          | false
+                    Java    | 1995          | true 
+
+                    Dynamic:
+                    Name        | YearInvented  | IsOpenSource
+                    JavaScript  | 1994          | false
+                ");
+            }
+
+            [Test]
+            public void It_will_return_groups()
+            {
+                Assert.IsInstanceOf<Expand.ExpandGroup>(groupsOfProgrammingLanguages);
+            }
+
+            [Test]
+            public void It_will_handle_a_single_group()
+            {
+                var groups = Expand.GroupOfTables(@"
+                    Static:
+                    Name    | YearInvented  | IsOpenSource
+                    C#      | 2001          | false
+                ");
+
+                Assert.IsNotNull(groups.Group1);
+                Assert.IsNull(groups.Group2);
+                Assert.IsNull(groups.Group3);
+            }
+
+            [Test]
+            public void It_will_handle_two_groups()
+            {
+                var groups = Expand.GroupOfTables(@"
+                    Static:
+                    Name    | YearInvented  | IsOpenSource
+                    C#      | 2001          | false
+
+                    dynamic:
+                    Name        | YearInvented  | IsOpenSource
+                    JavaScript  | 1994      | false
+                ");
+
+                Assert.IsNotNull(groups.Group1);
+                Assert.IsNotNull(groups.Group2);
+                Assert.IsNull(groups.Group3);
+            }
+
+            [Test]
+            public void It_will_handle_three_groups()
+            {
+                var groups = Expand.GroupOfTables(@"
+                    Static:
+                    Name    | YearInvented  | IsOpenSource
+                    C#      | 2001          | false
+
+                    dynamic:
+                    Name        | YearInvented  | IsOpenSource
+                    JavaScript  | 1994          | false
+
+                    functional:
+                    Name    | YearInveted | IsOpenSource
+                    Lisp    | 1960        | true
+                ");
+
+                Assert.IsNotNull(groups.Group1);
+                Assert.IsNotNull(groups.Group2);
+                Assert.IsNotNull(groups.Group3);
+            }
+        }
     }
 }

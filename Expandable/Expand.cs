@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Expandable;
 using Expandable.Extensions;
 
@@ -23,6 +24,28 @@ public class Expand
         expand.table = inputData;
 
         return expand;
+    }
+
+    public static ExpandGroup GroupOfTables(String inputData)
+    {
+        var groups = new ExpandGroup();
+        var groupsAsString = Regex.Split(inputData.Trim(),  @"\w*:", RegexOptions.IgnoreCase).
+            Where(g => !String.IsNullOrEmpty(g)).ToArray();
+        
+        if (groupsAsString.Count() > 0)
+            groups.Group1 = Table(groupsAsString[0]);
+        if (groupsAsString.Count() > 1)
+            groups.Group2 = Table(groupsAsString[1]);
+        if (groupsAsString.Count() > 2)
+            groups.Group3 = Table(groupsAsString[2]);
+        return groups;
+    }
+
+    public class ExpandGroup
+    {
+        public Expand Group1 { get; internal set; }
+        public Expand Group2 { get; internal set; }
+        public Expand Group3 { get; internal set; }
     }
 
     public IList<T> ToListOf<T>()
@@ -95,4 +118,5 @@ public class Expand
 
         return result;
     }
+
 }
