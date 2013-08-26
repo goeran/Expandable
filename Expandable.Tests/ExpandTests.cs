@@ -220,6 +220,25 @@ namespace Expandable.Tests
             }
 
             [Test]
+            public void It_will_parse_data_for_groups()
+            {
+                var staticLanguages = groupsOfProgrammingLanguages.Group1.ToListOf<ProgrammingLanguage>();
+                Assert.IsNotNull(staticLanguages);
+                Assert.AreEqual(2, staticLanguages.Count);
+                var java = staticLanguages[1];
+                Assert.IsNotNull(java);
+                Assert.AreEqual("Java", java.Name);
+                Assert.AreEqual(1995, java.YearInvented);
+
+                var dynamicLanguages = groupsOfProgrammingLanguages.Group2.ToListOf<ProgrammingLanguage>();
+                Assert.IsNotNull(dynamicLanguages);
+                Assert.AreEqual(1, dynamicLanguages.Count);
+                var javascript = dynamicLanguages[0];
+                Assert.AreEqual("JavaScript", javascript.Name);
+                Assert.AreEqual(1994, javascript.YearInvented);
+            }
+
+            [Test]
             public void It_will_handle_a_single_group()
             {
                 var groups = Expand.GroupOfTables(@"
