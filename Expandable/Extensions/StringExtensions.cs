@@ -5,9 +5,7 @@ namespace Expandable.Extensions
 {
     public static class StringExtensions
     {
-        private static readonly NumberFormatInfo americanNumberFormat = new CultureInfo("en-US").NumberFormat;
-
-        public static object ConvertUsingType(this string val, Type memberType)
+        public static object ConvertUsingType(this string val, Type memberType, CultureInfo culture)
         {
             if (memberType == typeof(String))
                 return val.Trim();
@@ -16,9 +14,9 @@ namespace Expandable.Extensions
             if (memberType == typeof(uint))
                 return uint.Parse(val);
             if (memberType == typeof(Double))
-                return double.Parse(val, americanNumberFormat);
+                return double.Parse(val, culture.NumberFormat);
             if (memberType == typeof(float))
-                return float.Parse(val, americanNumberFormat);
+                return float.Parse(val, culture.NumberFormat);
             if (memberType == typeof(Boolean))
                 return bool.Parse(val);
             if (memberType.IsEnum)
@@ -30,7 +28,7 @@ namespace Expandable.Extensions
             if (memberType == typeof(long))
                 return long.Parse(val);
             if (memberType == typeof(decimal))
-                return decimal.Parse(val, americanNumberFormat);
+                return decimal.Parse(val, culture.NumberFormat);
             return null;
         }
     }

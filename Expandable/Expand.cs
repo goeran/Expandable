@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -10,6 +11,7 @@ public class Expand
 {
     private string table;
     private const BindingFlags instanceMemebersAndPublic = BindingFlags.Instance | BindingFlags.Public;
+    private CultureInfo culture = new CultureInfo("en-US");
 
     private Expand()
     {
@@ -68,7 +70,7 @@ public class Expand
                     {
                         if (property.Name == tableParser.Columns.ElementAt(colIndex))
                         {
-                            var val = row.ElementAt(colIndex).ConvertUsingType(property.PropertyType);
+                            var val = row.ElementAt(colIndex).ConvertUsingType(property.PropertyType, culture);
                             property.SetValue(obj, val, new object[0]);
                             break;
                         }
@@ -104,7 +106,7 @@ public class Expand
                         {
                             if (param.Name.ToLower() == tableParser.Columns.ElementAt(colIndex).ToLower())
                             {
-                                var val = row.ElementAt(colIndex).ConvertUsingType(param.ParameterType);
+                                var val = row.ElementAt(colIndex).ConvertUsingType(param.ParameterType, culture);
                                 ctorParams.Add(val);
                                 break;
                             }
@@ -119,4 +121,9 @@ public class Expand
         return result;
     }
 
+    public Expand Culture(CultureInfo cultureInfo)
+    {
+        this.culture = cultureInfo;
+        return this;
+    }
 }

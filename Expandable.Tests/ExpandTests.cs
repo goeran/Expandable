@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Expandable.Tests.ClassesUsedForTesting;
 using NUnit.Framework;
@@ -290,6 +291,22 @@ namespace Expandable.Tests
                 Assert.IsNotNull(groups.Group1);
                 Assert.IsNotNull(groups.Group2);
                 Assert.IsNotNull(groups.Group3);
+            }
+
+            [Test]
+            public void It_is_possible_to_specify_culture()
+            {
+                var persons = Expand.Table(@"
+                    Name    | Salary
+                    Steve   | 100,50
+                    bill    | 50000,90
+                ").Culture(new CultureInfo("nb-NO")).ToListOf<Person>();
+
+                Assert.AreEqual(2, persons.Count);
+                var steve = persons[0];
+                var bill = persons[1];
+                Assert.AreEqual(100.50, steve.Salary);
+                Assert.AreEqual(50000.90, bill.Salary);
             }
         }
     }
