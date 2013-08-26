@@ -48,6 +48,14 @@ public class Expand
         public Expand Group1 { get; internal set; }
         public Expand Group2 { get; internal set; }
         public Expand Group3 { get; internal set; }
+
+        public ExpandGroup Culture(CultureInfo cultureInfo)
+        {
+            if (Group1 != null) Group1.culture = cultureInfo;
+            if (Group2 != null) Group2.culture = cultureInfo;
+            if (Group3 != null) Group3.culture = cultureInfo;
+            return this;
+        }
     }
 
     public IList<T> ToListOf<T>()

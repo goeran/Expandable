@@ -148,6 +148,22 @@ namespace Expandable.Tests
                 Assert.IsNull(bill.Address);
             }
 
+            [Test]
+            public void It_is_possible_to_specify_culture()
+            {
+                var persons = Expand.Table(@"
+                    Name    | Salary
+                    Steve   | 100,50
+                    bill    | 50000,90
+                ").Culture(new CultureInfo("nb-NO")).ToListOf<Person>();
+
+                Assert.AreEqual(2, persons.Count);
+                var steve = persons[0];
+                var bill = persons[1];
+                Assert.AreEqual(100.50, steve.Salary);
+                Assert.AreEqual(50000.90, bill.Salary);
+            }
+
             //TODO: test SByte, Int16, UInt16, Int64, UInt64, Single, Char
             //TODO: test for ignore casing on properties
         }
@@ -296,11 +312,12 @@ namespace Expandable.Tests
             [Test]
             public void It_is_possible_to_specify_culture()
             {
-                var persons = Expand.Table(@"
+                var persons = Expand.GroupOfTables(@"
+                    employees:
                     Name    | Salary
                     Steve   | 100,50
                     bill    | 50000,90
-                ").Culture(new CultureInfo("nb-NO")).ToListOf<Person>();
+                ").Culture(new CultureInfo("nb-NO")).Group1.ToListOf<Person>();
 
                 Assert.AreEqual(2, persons.Count);
                 var steve = persons[0];
