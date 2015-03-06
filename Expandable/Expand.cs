@@ -31,7 +31,7 @@ public class Expand
     public static ExpandGroup GroupOfTables(String inputData)
     {
         var groups = new ExpandGroup();
-        var groupsAsString = Regex.Split(inputData.Trim(),  @"\w*:", RegexOptions.IgnoreCase).
+        var groupsAsString = Regex.Split(inputData.Trim(),  @"\w{3,}\:", RegexOptions.IgnoreCase).
             Where(g => !String.IsNullOrEmpty(g)).ToArray();
         
         if (groupsAsString.Count() > 0)

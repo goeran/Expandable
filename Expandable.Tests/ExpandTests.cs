@@ -44,9 +44,9 @@ namespace Expandable.Tests
             public void Setup()
             {
                 employees = Expand.Table(@"
-                    Name    | Age | Salary      | Height    | DateOfBirth   | Weight    | HasPhone | EmployeeStatus | Department    | Address   | Performance   | NetWorth  | Comment
-                    Steve   | 55  | 150000      | 188.8     | 1955-02-24    | 70.1      | true     | Unknown        | 1             |           | 200           | 10        | This should be ignored
-                    Bill    | 56  | 160000.10   | 166.5     | 1955-10-28    | 68.9      | false    | Retired        | 2             |           | 110           | 40        |
+                    Name    | Age | Salary      | Height    | DateOfBirth           | Weight    | HasPhone | EmployeeStatus | Department    | Address   | Performance   | NetWorth  | Comment
+                    Steve   | 55  | 150000      | 188.8     | 1955-02-24 13:00:10   | 70.1      | true     | Unknown        | 1             |           | 200           | 10        | This should be ignored
+                    Bill    | 56  | 160000.10   | 166.5     | 1955-10-28 12:10:05   | 68.9      | false    | Retired        | 2             |           | 110           | 40        |
                 ").ToListOf<Person>();
                 steve = employees.ElementAt(0);
                 bill = employees.ElementAt(1);
@@ -109,8 +109,8 @@ namespace Expandable.Tests
             [Test]
             public void It_will_be_able_to_set_properties_of_datetime()
             {
-                Assert.AreEqual(new DateTime(1955, 2, 24), steve.DateOfBirth);
-                Assert.AreEqual(new DateTime(1955, 10, 28), bill.DateOfBirth);
+                Assert.AreEqual(new DateTime(1955, 2, 24, 13, 0, 10), steve.DateOfBirth);
+                Assert.AreEqual(new DateTime(1955, 10, 28, 12, 10, 5), bill.DateOfBirth);
             }
 
             [Test]
@@ -324,6 +324,26 @@ namespace Expandable.Tests
                 var bill = persons[1];
                 Assert.AreEqual(100.50, steve.Salary);
                 Assert.AreEqual(50000.90, bill.Salary);
+            }
+
+            [Test]
+            public void It_handle_norwegian_datetime_values()
+            {
+                var employees = Expand.GroupOfTables(@"
+                    addresses:
+                    StreetName          | StreetNumber
+                    Elm street          | 1
+                    Washington          | 2
+
+                    employees:
+                    Name    | Age | Salary      | Height    | DateOfBirth
+                    Steve   | 55  | 150000      | 188,8     | 24.02.1955 13:00:10
+                    Bill    | 56  | 160000,10   | 166,5     | 28.10.1955 12:10:05
+
+                ").Culture(new CultureInfo("nb-NO")).Group2.ToListOf<Person>();
+
+                Assert.AreEqual(2, employees.Count());
+                Assert.AreEqual(new DateTime(1955, 2, 24, 13, 0, 10), employees.ElementAt(0).DateOfBirth);
             }
         }
     }
