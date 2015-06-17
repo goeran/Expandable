@@ -1,7 +1,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="build ">
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
-    <nugetVersion Condition="'$(nugetVersion)' == ''">0.4.7</nugetVersion>
+    <nugetVersion Condition="'$(nugetVersion)' == ''">0.4.8</nugetVersion>
     <build-output>build-output</build-output>
     <build-tool>..\BuildTool\bin\$(Configuration)\BuildTool.exe</build-tool>
   </PropertyGroup>
