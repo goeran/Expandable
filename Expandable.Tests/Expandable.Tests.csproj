@@ -45,11 +45,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClassesUsedForTesting\AccountingTransactionBase.cs" />
     <Compile Include="ClassesUsedForTesting\Address.cs" />
     <Compile Include="ClassesUsedForTesting\EmployeeStatus.cs" />
     <Compile Include="ClassesUsedForTesting\Person.cs" />
     <Compile Include="ClassesUsedForTesting\ProgrammingLanguage.cs" />
     <Compile Include="ExpandTests.cs" />
+    <Compile Include="PerformanceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

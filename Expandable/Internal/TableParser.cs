@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Expandable
+namespace Expandable.Internal
 {
     internal class TableParser
     {
         private string data;
-        private readonly List<string> columns = new List<string>();
+        private readonly HashSet<string> columns = new HashSet<string>(); 
         private readonly List<List<string>> rows = new List<List<string>>();
 
         public TableParser(string data)
@@ -26,6 +26,11 @@ namespace Expandable
             get { return rows; }
         }
 
+        public bool HasColumn(string name)
+        {
+            return columns.Contains(name.ToLower());
+        }
+
         public void Parse()
         {
             String header = null;
@@ -39,7 +44,10 @@ namespace Expandable
                         if (header == null)
                         {
                             header = line;
-                            columns.AddRange(header.Split('|').Select(c => c.Trim()));
+                            foreach (var colName in header.Split('|').Select(c => c.Trim()))
+                            {
+                                columns.Add(colName.ToLower());
+                            }
                         }
                         else
                         {

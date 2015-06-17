@@ -43,8 +43,11 @@
     <Compile Include="Expand.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Internal\IObjectCreationStrategy.cs" />
+    <Compile Include="Internal\ObjectCreationCtorStrategy.cs" />
+    <Compile Include="Internal\ObjectCtreationParameterlessCtorStrategy.cs" />
+    <Compile Include="Internal\TableParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TableParser.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
