@@ -2,9 +2,9 @@
 
 namespace Expandable.Tests.ClassesUsedForTesting
 {
-    public class AccountingTransactionBase
+    public class AccountingTransaction
     {
-        public AccountingTransactionBase(int voucherNr, int accountNr, double debit,
+        public AccountingTransaction(int voucherNr, int accountNr, double debit,
             double credit, DateTime date, int period,
             int year, DateTime registeredDate)
         {

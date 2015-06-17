@@ -9,10 +9,11 @@ namespace Expandable.Internal
 {
     internal class ObjectCreationCtorStrategy<T> : IObjectCreationStrategy<T>
     {
-        private TableParser tableParser;
-        private CultureInfo culture;
+        private readonly TableParser tableParser;
+        private readonly CultureInfo culture;
         private ConstructorInfo matchedConstructor;
-        private Dictionary<string, int> ctorArgumentToColumnsInTableMapping;
+        private Dictionary<int, int> paramToColIndexMapping;
+        private ParameterInfo[] matchedConstructorParams;
 
         public ObjectCreationCtorStrategy(TableParser tableParser, CultureInfo culture)
         {
@@ -20,43 +21,7 @@ namespace Expandable.Internal
             this.tableParser = tableParser;
 
             FindMatchingCtor();
-            MapCtorArgumentsToColumnsInTable();
-        }
-
-        public T CreateObjectFromRow(IEnumerable<string> row)
-        {
-            if (matchedConstructor == null)
-            {
-                return default(T);
-            }
-
-            var ctorParams = new List<object>();
-            foreach (var param in matchedConstructor.GetParameters())
-            {
-                ctorParams.Add(row.ElementAt(ctorArgumentToColumnsInTableMapping[param.Name.ToLower()]).ConvertUsingType(param.ParameterType, culture));
-            }
-            return (T)Activator.CreateInstance(typeof(T), ctorParams.ToArray());
-        }
-
-        private void MapCtorArgumentsToColumnsInTable()
-        {
-            if (ctorArgumentToColumnsInTableMapping != null)
-            {
-                return;
-            }
-
-            ctorArgumentToColumnsInTableMapping = new Dictionary<string, int>();
-            foreach (var param in matchedConstructor.GetParameters())
-            {
-                for (var colIndex = 0; colIndex < tableParser.Columns.Count(); colIndex++)
-                {
-                    if (param.Name.ToLower() == tableParser.Columns.ElementAt(colIndex).ToLower())
-                    {
-                        ctorArgumentToColumnsInTableMapping.Add(param.Name.ToLower(), colIndex);
-                        break;
-                    }
-                }
-            }
+            MapCtorParamsToColumnsInTable();
         }
 
         private void FindMatchingCtor()
@@ -83,6 +48,45 @@ namespace Expandable.Internal
             }
 
             matchedConstructor = ctorMatchesAgainstColumns.OrderByDescending(kv => kv.Value).First().Key;
+        }
+
+        private void MapCtorParamsToColumnsInTable()
+        {
+            if (paramToColIndexMapping == null)
+            {
+                paramToColIndexMapping = new Dictionary<int, int>();
+                matchedConstructorParams = matchedConstructor.GetParameters();
+
+                for (var i = 0; i < matchedConstructorParams.Length; i++)
+                {
+                    for (var j = 0; j < tableParser.Columns.Count; j++)
+                    {
+                        if (matchedConstructorParams[i].Name.ToLower().Equals(tableParser.Columns[j]))
+                        {
+                            paramToColIndexMapping.Add(i, j);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+
+        public T CreateObjectFromRow(IList<string> row)
+        {
+            if (matchedConstructor == null)
+            {
+                return default(T);
+            }
+
+            var ctorParams = new object[matchedConstructorParams.Length];
+            for (int i = 0; i < matchedConstructorParams.Length; i++)
+            {
+                var valAsStr = row[paramToColIndexMapping[i]];
+                var valConverted = valAsStr.ConvertUsingType(matchedConstructorParams[i].ParameterType, culture);
+                ctorParams[i] = valConverted;
+            }
+            return (T)Activator.CreateInstance(typeof(T), ctorParams);
         }
     }
 }

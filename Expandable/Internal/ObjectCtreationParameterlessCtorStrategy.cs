@@ -19,7 +19,7 @@ namespace Expandable.Internal
             this.tableParser = tableParser;
         }
 
-        public T CreateObjectFromRow(IEnumerable<string> row)
+        public T CreateObjectFromRow(IList<string> row)
         {
             var obj = Activator.CreateInstance<T>();
             var properties = obj.GetType().GetProperties(instanceMemeberAndPublic | BindingFlags.SetProperty);
@@ -29,7 +29,7 @@ namespace Expandable.Internal
                 {
                     if (property.Name.ToLower() == tableParser.Columns.ElementAt(colIndex))
                     {
-                        var val = row.ElementAt(colIndex).ConvertUsingType(property.PropertyType, culture);
+                        var val = row[colIndex].ConvertUsingType(property.PropertyType, culture);
                         property.SetValue(obj, val, new object[0]);
                         break;
                     }

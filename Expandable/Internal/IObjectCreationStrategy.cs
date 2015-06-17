@@ -4,6 +4,6 @@ namespace Expandable.Internal
 {
     internal interface IObjectCreationStrategy<T>
     {
-        T CreateObjectFromRow(IEnumerable<string> row);
+        T CreateObjectFromRow(IList<string> row);
     }
 }

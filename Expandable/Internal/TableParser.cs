@@ -10,18 +10,19 @@ namespace Expandable.Internal
         private string data;
         private readonly HashSet<string> columns = new HashSet<string>(); 
         private readonly List<List<string>> rows = new List<List<string>>();
+        private List<string> columnsList;
 
         public TableParser(string data)
         {
             this.data = data;
         }
 
-        public IEnumerable<string> Columns
+        public IList<string> Columns
         {
-            get { return columns; }
+            get { return columnsList ?? (columnsList = columns.ToList()); }
         }
 
-        public IEnumerable<IEnumerable<string>> Rows
+        public IEnumerable<IList<string>> Rows
         {
             get { return rows; }
         }

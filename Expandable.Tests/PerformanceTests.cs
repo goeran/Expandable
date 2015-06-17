@@ -22,7 +22,7 @@ namespace Expandable.Tests
                 var stopwatch = new Stopwatch();
                 
                 stopwatch.Start();
-                Expand.Table(asciiTable).ToListOf<AccountingTransactionBase>();
+                Expand.Table(asciiTable).ToListOf<AccountingTransaction>();
                 stopwatch.Stop();
 
                 Console.WriteLine(stopwatch.Elapsed);
@@ -33,6 +33,24 @@ namespace Expandable.Tests
             public void It_should_ble_able_to_Expand_500k_rows_in_under_5_5_secs()
             {
                 AssertObjectsExpandedInTime(ASCIITableWithNumberOfRows(500000), maxTime: 5.5);
+            }
+
+            [Test]
+            [Explicit("Using for learning purposes")]
+            public void How_long_does_it_take_to_create_500k_objects_using_reflection()
+            {
+                var stopwatch = new Stopwatch();
+
+                stopwatch.Start();
+
+                for (int i = 0; i < 500*1000; i++)
+                {
+                    var obj = Activator.CreateInstance(typeof(AccountingTransaction), new object[] { 1, 3000, 250, 250, DateTime.Now, 1, 2015, DateTime.Today });
+                }
+
+                stopwatch.Stop();
+
+                Console.WriteLine(stopwatch.Elapsed);
             }
 
             private static string ASCIITableWithNumberOfRows(int numberOfRows)

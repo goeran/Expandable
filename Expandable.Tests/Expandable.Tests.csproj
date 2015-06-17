@@ -45,7 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClassesUsedForTesting\AccountingTransactionBase.cs" />
+    <Compile Include="ClassesUsedForTesting\AccountingTransaction.cs" />
     <Compile Include="ClassesUsedForTesting\Address.cs" />
     <Compile Include="ClassesUsedForTesting\EmployeeStatus.cs" />
     <Compile Include="ClassesUsedForTesting\Person.cs" />
